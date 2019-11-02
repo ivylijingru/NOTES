@@ -22,7 +22,7 @@ unlock() {
 ```
 
 ### test & set 实现
-```
+```C
 //将 1 写入 X, 返回 X 原来的值
 test_and_set(X) {
     tmp = X;
@@ -42,7 +42,7 @@ unlock() {
 ```
 
 ### 无忙等待（错误实现）
-```
+```C
 lock() {
     disable interrupts;
     if (value == FREE) {
