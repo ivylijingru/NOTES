@@ -96,3 +96,7 @@ V(empty);
      while(condition) wait();       //after wait, will verify the condition again
      ```
 - 实现细节：wait 或者 leave 的时候，先从紧急等待队列里头挑；如果没有等着的进程，再释放锁，让外面等着的进来。
+
+### PThread
+- 互斥量：`Pthread_mutex_lock`，`Pthread_mutex_unlock`
+- 条件变量：`Pthread_cond_wait`，`Pthread_cond_signal`
