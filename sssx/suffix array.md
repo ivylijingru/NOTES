@@ -20,19 +20,15 @@ bool compare_sa(int i, int j) {
 void construct_sa(string S, int *sa) {
 	n = S.length();	
 	for (int i = 0; i <= n; i++) {
-		sa[i] = i;                  //初始未排序，i 字符开始，位置就是 i
-		Rank[i] = i < n ? S[i] : -1; 
-        // S[i] 表示所有1-后缀的排名
+		sa[i] = i;                   //初始未排序，i 字符开始，位置就是 i
+		Rank[i] = i < n ? S[i] : -1; // S[i] 表示所有1-后缀的排名
 	}
-    //k每次扩大两倍，体现倍增思想
-	for(k = 1; k <= n; k *=2) {
-		sort(sa, sa + n + 1, compare_sa);
-        //对更新了rank的sa重新排序
+	for(k = 1; k <= n; k *=2) {    			//k每次扩大两倍，体现倍增思想
+		sort(sa, sa + n + 1, compare_sa);	//对更新了rank的sa重新排序
 		tmp[sa[0]] = 0;
 		for (int i = 1; i <= n; i++) {
 			tmp[sa[i]] = tmp[sa[i - 1]] + (compare_sa(sa[i - 1], sa[i]) ? 1 : 0);
-		}
-        //从排名最小的位置开始，如果发现跟下一个的排名一样大，则+1（不一样大也+1）
+		} 	//从排名最小的位置开始，如果发现跟下一个的排名一样大，则+1（不一样大也+1）
 		for (int i = 0; i <= n; i++) {
 			Rank[i] = tmp[i];
 		}
@@ -52,9 +48,7 @@ void construct_lcp(string S, int *sa, int *lcp) {
 	int h = 0;
 	lcp[0] = 0;
 	for (int i = 0; i < n; i++) {
-		int j = sa[Rank[i] - 1];
-		//因为 Rank[n] 排在第一位，此处不会越界
-        //取排名在 rank[i] 前一位的 j
+		int j = sa[Rank[i] - 1];    //取排名在 rank[i] 前一位的 j。因为 Rank[n] 排在第一位，此处不会越界
 		if (h > 0) h--;             //由于 H 定理，只需要从 H[i-1]-1 开始
 		for(; j + h < n && i + h < n; h++) {
 			if (S[j + h] != S[i + h]) break;
