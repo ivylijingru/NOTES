@@ -86,7 +86,7 @@ V(empty);
 - 对于生产者来说，`P(empty)` 与 `P(mutex)` 不能互换；因为 mutex 之后发现缓冲区满之后睡眠；消费者试图拿走一个物品，但是 mutex 上了锁，所以没办法拿到。也没有办法唤醒生产者。
 
 ### monitor
-- OS 把**互斥**这件事交给了编译器解决，通过加 monitor 标记让编译器把某一段代码变成原语。
+- OS 把**互斥**这件事交给了编译器解决，通过加 monitor 标记让编译器把某一段代码变成原语。某个时刻只能有**一个进程或线程**留在管程中（保证互斥）。
 - 通过条件变量，wait+signal 进行**同步**。条件变量即是一个队列，不满足某种条件的 process 等在某个条件变量上。等满足的时候通过 signal 唤醒之。而唤醒一个变量时，将导致唤醒者、被唤醒者同时活跃。此时将做出选择。
    - Hoare 管程，signal 之后总让**被唤醒者**上 CPU，此时唤醒者停止运行，进入**紧急等待队列**。缺点是 signal 对于唤醒者来说，进程切换了两次。
    - MESA 管程，signal 之后重新调度，通过竞争，让 OS 决定哪个先上 CPU。进入阻塞状态的进程等待 notify 重新回到就绪队列，并等待机会上 CPU。但不知道调度回来时是否仍符合条件，因此用 while 代替 if.这种情况下就没必要一个一个唤醒，可以一下子唤醒整个队列。
@@ -117,17 +117,17 @@ monitor ProducerConsumer:
    
    count := 0;
 end monitor;
-
+// 生产者、消费者调用管程中的函数；
 procedure producer;
 begin
     while true do
     begin
         item = produce_item
-        ProducerConsumer(item)
+        ProducerConsumer.insert(item)
     end
 end;
 
-procedure producer;
+procedure consumer;
 begin
     while true do
     begin
@@ -139,3 +139,33 @@ end;
 ### PThread
 - 互斥量：`Pthread_mutex_lock`，`Pthread_mutex_unlock`
 - 条件变量：`Pthread_cond_wait`，`Pthread_cond_signal`
+
+## 第一类读者写者
+### semaphore
+- 读者：第一个进去的时候 P，且不允许读者进。只要**临界区里有读者**，以后的读者可以随便进，直到临界区没有读者才 V。
+- 写者：如果有读者则等；写者之间互斥——有其他写者则该写者等待。
+```C
+void reader() {
+    P(mutex);
+    rc += 1;
+    if(rc == 1) P(w);
+    V(mutex);
+    
+    //read here
+    
+    P(mutex);
+    rc -= 1;
+    if(rc == 0) V(w);
+    V(mutex);
+}
+
+void writer() {
+    while(TRUE) {
+        P(w);
+        
+        //write here
+        
+        V(w);
+    }
+}
+```
