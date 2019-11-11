@@ -169,7 +169,7 @@ void writer() {
     }
 }
 ```
-管程实现读者-写者问题：
+- 管程实现读者-写者问题：管程只操作开始、结束的部分，**读操作**可以多个进程（reader）**同时进行**
 ```C
 monitor ReaderWriter:
     condition rq, wq;
