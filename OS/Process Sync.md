@@ -188,13 +188,13 @@ monitor ReaderWriter:
     procedure finish_r;
     BEGIN
         reading_count --;
-        if reading_count == 0 then signal(wq);
+        if reading_count == 0 then signal(wq);  //最后一个读者，则唤醒写者。
     END
     
     procedure start_w;
     BEGIN
         write_count ++;
-        if (write_count > 1) or (reading_count > 0) then wait(wq);
+        if (write_count > 1) or (reading_count > 0) then wait(wq);   //有读者在读或有写者在写
     END
     
     procedure finish_w;
@@ -203,5 +203,19 @@ monitor ReaderWriter:
         if reading_count == 0 then signal(wq);
         else signal(rq);
     END
+END
+
+procedure reader;
+BEGIN
+   ReaderWriter.start_r;
+   //read here
+   ReaderWriter.finish_r;
+END
+
+procedure writer;
+BEGIN
+   ReaderWriter.start_w;
+   //write here
+   ReaderWriter.finish_w;
 END
 ```
