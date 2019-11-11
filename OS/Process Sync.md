@@ -90,11 +90,11 @@ V(empty);
 - 通过条件变量，wait+signal 进行**同步**。条件变量即是一个队列，不满足某种条件的 process 等在某个条件变量上。等满足的时候通过 signal 唤醒之。而唤醒一个变量时，将导致唤醒者、被唤醒者同时活跃。此时将做出选择。
    - Hoare 管程，signal 之后总让**被唤醒者**上 CPU，此时唤醒者停止运行，进入**紧急等待队列**。缺点是 signal 对于唤醒者来说，进程切换了两次。
    - MESA 管程，signal 之后重新调度，通过竞争，让 OS 决定哪个先上 CPU。进入阻塞状态的进程等待 notify 重新回到就绪队列，并等待机会上 CPU。但不知道调度回来时是否仍符合条件，因此用 while 代替 if.这种情况下就没必要一个一个唤醒，可以一下子唤醒整个队列。
-   - ```C
-     if(coundition) wait();
-     change into:
-     while(condition) wait();       //after wait, will verify the condition again
-     ```
+ ```C
+if(coundition) wait();
+change into:
+while(condition) wait();       //after wait, will verify the condition again
+```
 - 实现细节：wait 或者 leave 的时候，先从紧急等待队列里头挑；如果没有等着的进程，再释放锁，让外面等着的进来。
 ```C
 monitor ProducerConsumer:
@@ -148,7 +148,7 @@ end;
 void reader() {
     P(mutex);
     rc += 1;
-    if(rc == 1) P(w);
+    if(rc == 1) P(w); //if first reader blocked by this w, then other reader will be blocked on mutex
     V(mutex);
     
     //read here
