@@ -169,3 +169,39 @@ void writer() {
     }
 }
 ```
+管程实现读者-写者问题：
+```C
+monitor ReaderWriter:
+    condition rq, wq;
+    integer reading_count;
+    integer write_count;
+    reading_count := 0;
+    write_count := 0;
+    
+    procedure start_r;
+    BEGIN
+        if write_count > 0 then wait(rq);
+        reading_count ++;
+        signal(rq);
+    END;
+    
+    procedure finish_r;
+    BEGIN
+        reading_count --;
+        if reading_count == 0 then signal(wq);
+    END
+    
+    procedure start_w;
+    BEGIN
+        write_count ++;
+        if (write_count > 1) or (reading_count > 0) then wait(wq);
+    END
+    
+    procedure finish_w;
+    BEGIN
+        write_count --;
+        if reading_count == 0 then signal(wq);
+        else signal(rq);
+    END
+END
+```
